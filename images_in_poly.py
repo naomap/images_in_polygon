@@ -151,14 +151,9 @@ def main():
     used_city = {}
     for image in images_list:
         city = find_point_city(image[2], cities_dict)
+        used_city[city] = used_city.get(city, 0) + 1
         if not args.quiet:
             print("{} -> {}".format(image[0], city))
-        if city in used_city:
-            used_city[city] += 1
-        else:
-            used_city[city] = 1
-        if city is not None:
-            previous_city = city
         if args.destination:
             # copy images to a new directory named with the city name
             copy_to_destination(
