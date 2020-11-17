@@ -139,10 +139,10 @@ def main():
         print("{} -> {}".format(image[0], city))
         if city is not None:
             previous_city = city
-        if city is not None and args.destination:
+        if args.destination:
             # copy images to a new directory named with the city name
             copy_to_destination(
-                image[0], args.source, os.path.join(args.destination, city)
+                image[0], args.source, os.path.join(args.destination, str(city))
             )
 
     print("End of Script")
