@@ -41,6 +41,10 @@ def list_images(directory):
     return files
     
 def import_geojson(geojson_file):
+    """
+    import the geojson file and create a dict with the commune's name as the key
+    and a shape object as the value
+    """
     with open(geojson_file) as f:
         features = json.load(f)["features"]
     GeometryCollection([shape(feature["geometry"]).buffer(0) for feature in features])
