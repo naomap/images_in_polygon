@@ -132,24 +132,31 @@ def arg_parse():
         action="store_true",
     )
     args = parser.parse_args()
-    print(args)
     return args
 
 
 def main():
     print("image source path is:", args.source)
-    print("importing geojson: ", args.json_file)
+    print("importing geojson: ", args.json_file, end=" - ")
     cities_dict = import_geojson(args.json_file, args.properties)
+    print("{} polygons loaded".format(len(cities_dict)))
     # create image list with point position for shapely
-    print("creating image list...")
+    print("creating image list...", end=" ")
     images_list = list_images(args.source)
+    print("{} images found".format(len(images_list)))
     # find outer polygon for each image
     print("searching for city...")
     previous_city = None
+    image_count = 0
+    used_city = {}
     for image in images_list:
         city = find_point_city(image[2], cities_dict)
         if not args.quiet:
             print("{} -> {}".format(image[0], city))
+        if city in used_city:
+            used_city[city] += 1
+        else:
+            used_city[city] = 1
         if city is not None:
             previous_city = city
         if args.destination:
@@ -157,7 +164,8 @@ def main():
             copy_to_destination(
                 image[0], args.source, os.path.join(args.destination, str(city))
             )
-
+            image_count += 1
+    print("{} images copied to {} directory : {}".format(image_count, len(used_city), used_city))
     print("End of Script")
 
 
