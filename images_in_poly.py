@@ -40,7 +40,7 @@ def list_images(directory):
 
         except KeyError as e:
             # if any of the required tags are not set the image is not added to the list
-            print("Skipping {0}: {1}".format(filename, e))
+            print("Skipping {0}: - {1} is missing".format(filepath, e))
 
     files.sort(key=lambda timestamp: timestamp[1])
     # print_list(files)
@@ -125,6 +125,12 @@ def arg_parse():
         "--destination",
         help="Path to the destination folder in which the images will be copied",
     )
+    parser.add_argument(
+        "-q",
+        "--quiet",
+        help="Don't display the result",
+        action="store_true",
+    )
     args = parser.parse_args()
     print(args)
     return args
@@ -142,7 +148,8 @@ def main():
     previous_city = None
     for image in images_list:
         city = find_point_city(image[2], cities_dict)
-        print("{} -> {}".format(image[0], city))
+        if not args.quiet:
+            print("{} -> {}".format(image[0], city))
         if city is not None:
             previous_city = city
         if args.destination:
