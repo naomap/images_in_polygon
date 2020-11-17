@@ -47,7 +47,7 @@ def list_images(directory):
     return files
 
 
-def import_geojson(geojson_file):
+def import_geojson(geojson_file, properties_key):
     """
     import the geojson file and create a dict with the commune's name as the key
     and a shape object as the value
@@ -57,7 +57,7 @@ def import_geojson(geojson_file):
     GeometryCollection([shape(feature["geometry"]).buffer(0) for feature in features])
     cities = {}
     for feature in features:
-        city_name = feature["properties"]["NOM_COM"]
+        city_name = feature["properties"][properties_key]
         city_shape = shape(feature["geometry"])
         cities[city_name] = city_shape
 
@@ -109,6 +109,12 @@ def arg_parse():
         "-j", "--json_file", help="Path to the geojson file", required=True
     )
     parser.add_argument(
+        "-p",
+        "--properties",
+        help="Geojson properties key use to name the subfolders",
+        required=True,
+    )
+    parser.add_argument(
         "-s",
         "--source",
         help="Path to the images folder. Sub folder are scanned too",
@@ -127,7 +133,7 @@ def arg_parse():
 def main():
     print("image source path is:", args.source)
     print("importing geojson: ", args.json_file)
-    cities_dict = import_geojson(args.json_file)
+    cities_dict = import_geojson(args.json_file, args.properties)
     # create image list with point position for shapely
     print("creating image list...")
     images_list = list_images(args.source)
