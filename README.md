@@ -15,3 +15,9 @@ optional arguments:
                         Path to the destination folder in which the images
                         will be copied
                         ```
+## installation:
++Create a virtual environnement: `python3 -m venv image_in_polygon`
++Move to this environnement: `cd image_in_polygon`
++Activate this environnement: `source bin/activate`
++Clone this repository: `git clone https://github.com/Stefal/images_in_polygon.git`
++Install the requirements: `pip install -r images_in_polygon/requirements.txt`
