@@ -118,7 +118,7 @@ def arg_parse():
     parser.add_argument(
         "-p",
         "--properties",
-        help="Geojson properties key use to name the subfolders",
+        help="Geojson properties key used to name the subfolders",
         required=True,
     )
     parser.add_argument(
@@ -135,13 +135,13 @@ def arg_parse():
     parser.add_argument(
         "-w",
         "--write_tag",
-        help="write city tag inside image",
+        help="write area name inside image exif metadata (GpsAreaInformation)",
         action="store_true",
     )
     parser.add_argument(
         "-q",
         "--quiet",
-        help="Don't display the result",
+        help="Don't display images results",
         action="store_true",
     )
     args = parser.parse_args()

@@ -9,11 +9,16 @@ optional arguments:
   -v, --version         show program's version number and exit
   -j JSON_FILE, --json_file JSON_FILE
                         Path to the geojson file
+  -p PROPERTIES, --properties PROPERTIES
+                        Geojson properties key used to name the subfolders
   -s SOURCE, --source SOURCE
                         Path to the images folder. Sub folder are scanned too
   -d DESTINATION, --destination DESTINATION
                         Path to the destination folder in which the images
                         will be copied
+  -w, --write_tag       write area name inside image exif metadata
+                        (GpsAreaInformation)
+  -q, --quiet           Don't display images results
                         
 ```
                         
