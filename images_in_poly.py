@@ -175,7 +175,7 @@ def main():
                 image[0], args.source, os.path.join(args.destination, str(area))
             )
             image_count += 1
-            if args.write_tag:
+            if args.write_tag and area is not None:
                 write_exif(new_path, area)
             
     print("{} images copied to {} directory : {}".format(image_count, len(used_area), used_area))
