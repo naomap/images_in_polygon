@@ -9,8 +9,7 @@ import shutil
 import json
 from dateutil.tz import tzlocal
 from lib.exif_read import ExifRead as EXIF
-
-# from lib.exif_write import ExifEdit
+from lib.exif_write import ExifEdit
 from shapely.geometry import Point, GeometryCollection, shape
 
 
@@ -55,33 +54,40 @@ def import_geojson(geojson_file, properties_key):
     with open(geojson_file) as f:
         features = json.load(f)["features"]
     GeometryCollection([shape(feature["geometry"]).buffer(0) for feature in features])
-    cities = {}
+    areas = {}
     for feature in features:
-        city_name = feature["properties"][properties_key]
-        city_shape = shape(feature["geometry"])
-        cities[city_name] = city_shape
+        area_name = feature["properties"][properties_key]
+        area_shape = shape(feature["geometry"])
+        areas[area_name] = area_shape
 
-    return cities
-
-
-def check_point_in_city(point, city_shape):
-
-    return city_shape.contains(point)
+    return areas
 
 
-def find_point_city(point, cities_shapes, first_check=None):
+def check_point_in_polygon(point, area_shape):
+
+    return area_shape.contains(point)
+
+
+def find_polygon(point, area_shapes, first_check=None):
     """
     find outer polygon for each image (store the previous correct polygon to speed up calculation
      time as the next image will probably be in the same one)
     """
     if first_check is not None:
-        if check_point_in_city(point, cities_shapes[first_check]):
+        if check_point_in_polygon(point, area_shapes[first_check]):
             return first_check
 
-    for city in cities_shapes:
-        if check_point_in_city(point, cities_shapes[city]):
-            return city
+    for area in area_shapes:
+        if check_point_in_polygon(point, area_shapes[area]):
+            return area
 
+def write_exif(image_path, value):
+    #add_custom_tag(self, value, main_key, tag_key)
+    #self._ef[main_key][tag_key] = value
+    #self._ef["IPTC"]["City"] = city
+    metadata = ExifEdit(image_path)
+    metadata.add_gpsareainformation(str(value))
+    metadata.write()
 
 def copy_to_destination(image_path, source_directory, destination_directory):
     """
@@ -94,6 +100,7 @@ def copy_to_destination(image_path, source_directory, destination_directory):
         exist_ok=True,
     )
     shutil.copy2(image_path, full_destination_path)
+    return full_destination_path
 
 
 def arg_parse():
@@ -126,6 +133,12 @@ def arg_parse():
         help="Path to the destination folder in which the images will be copied",
     )
     parser.add_argument(
+        "-w",
+        "--write_tag",
+        help="write city tag inside image",
+        action="store_true",
+    )
+    parser.add_argument(
         "-q",
         "--quiet",
         help="Don't display the result",
@@ -138,29 +151,34 @@ def arg_parse():
 def main():
     print("image source path is:", args.source)
     print("importing geojson: ", args.json_file, end=" - ")
-    cities_dict = import_geojson(args.json_file, args.properties)
-    print("{} polygons loaded".format(len(cities_dict)))
+    area_dict = import_geojson(args.json_file, args.properties)
+    print("{} polygons loaded".format(len(area_dict)))
     # create image list with point position for shapely
     print("creating image list...", end=" ")
     images_list = list_images(args.source)
     print("{} images found".format(len(images_list)))
     # find outer polygon for each image
     print("searching for city...")
-    previous_city = None
+    previous_area = None
     image_count = 0
-    used_city = {}
+    used_area = {}
     for image in images_list:
-        city = find_point_city(image[2], cities_dict)
-        used_city[city] = used_city.get(city, 0) + 1
+        area = find_polygon(image[2], area_dict, previous_area)
+        used_area[area] = used_area.get(area, 0) + 1
+        if area is not None:
+            previous_area = area
         if not args.quiet:
-            print("{} -> {}".format(image[0], city))
+            print("{} -> {}".format(image[0], area))
         if args.destination:
             # copy images to a new directory named with the city name
-            copy_to_destination(
-                image[0], args.source, os.path.join(args.destination, str(city))
+            new_path = copy_to_destination(
+                image[0], args.source, os.path.join(args.destination, str(area))
             )
             image_count += 1
-    print("{} images copied to {} directory : {}".format(image_count, len(used_city), used_city))
+            if args.write_tag:
+                write_exif(new_path, area)
+            
+    print("{} images copied to {} directory : {}".format(image_count, len(used_area), used_area))
     print("End of Script")
 
 
