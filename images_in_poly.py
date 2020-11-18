@@ -111,7 +111,6 @@ def arg_parse():
     parser = argparse.ArgumentParser(
         description="Script to find in which polygon a geolocalized image belongs to"
     )
-    parser.add_argument("-v", "--version", action="version", version="release 1.0")
     parser.add_argument(
         "-j", "--json_file", help="Path to the geojson file", required=True
     )
@@ -144,6 +143,8 @@ def arg_parse():
         help="Don't display images results",
         action="store_true",
     )
+    parser.add_argument("-v", "--version", action="version", version="release 1.1")
+
     args = parser.parse_args()
     return args
 
